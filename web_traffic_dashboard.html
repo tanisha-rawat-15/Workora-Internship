@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Traffic Analytics Dashboard</title>
+
+<style>
+:root{
+  --navy:#12283A;
+  --navy-2:#1B3A4B;
+  --paper:#F4F7F8;
+  --card:#FFFFFF;
+  --line:#E1E7EA;
+  --ink:#152530;
+  --ink-soft:#5A6B73;
+  --organic:#2E86AB;
+  --ads:#F18F01;
+  --direct:#6A4C93;
+  --social:#C73E1D;
+  --good:#1E8E5A;
+  --bad:#C73E1D;
+  --mid:#F18F01;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+}
+
+header{
+  background:linear-gradient(135deg,var(--navy),var(--navy-2));
+  color:#fff;
+  padding:32px 40px 58px;
+}
+
+header .eyebrow{
+  font-size:12px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#9FC4D6;
+  font-weight:600;
+  margin-bottom:6px;
+}
+
+header h1{
+  margin:0 0 6px;
+  font-size:28px;
+  font-weight:700;
+}
+
+header p{
+  margin:0;
+  color:#C7D6DD;
+  font-size:14px;
+}
+
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  max-width:1180px;
+  margin:-40px auto 28px;
+  padding:0 40px;
+  position:relative;
+}
+
+.kpi{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:18px 20px;
+  box-shadow:0 2px 10px rgba(18,40,58,.06);
+}
+
+.kpi .val{
+  font-size:26px;
+  font-weight:700;
+  color:var(--navy-2);
+}
+
+.kpi .lbl{
+  font-size:12px;
+  color:var(--ink-soft);
+  margin-top:4px;
+}
+
+.kpi .sub{
+  font-size:11px;
+  color:#8A97A0;
+  margin-top:2px;
+}
+
+.wrap{
+  max-width:1180px;
+  margin:0 auto;
+  padding:28px 40px 60px;
+}
+
+.section{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:24px 26px;
+  margin-bottom:22px;
+  box-shadow:0 2px 10px rgba(18,40,58,.04);
+}
+
+.section h2{
+  font-size:17px;
+  margin:0 0 4px;
+  color:var(--navy-2);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.section h2 .num{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:24px;
+  height:24px;
+  background:var(--navy-2);
+  color:#fff;
+  border-radius:6px;
+  font-size:12px;
+}
+
+.desc{
+  color:var(--ink-soft);
+  font-size:13.5px;
+  line-height:1.55;
+  margin:8px 0 18px;
+  max-width:950px;
+}
+
+.chart-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:22px;
+}
+
+.chart-box{
+  background:#FBFCFD;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:16px;
+  min-height:300px;
+}
+
+.chart-box h3{
+  font-size:12.5px;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  color:var(--ink-soft);
+  margin:0 0 18px;
+  font-weight:600;
+}
+
+/* Traffic doughnut */
+.donut-wrap{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:28px;
+  min-height:220px;
+}
+
+.donut{
+  width:190px;
+  height:190px;
+  border-radius:50%;
+  background:conic-gradient(
+    var(--organic) 0 20%,
+    var(--ads) 20% 40%,
+    var(--direct) 40% 70%,
+    var(--social) 70% 100%
+  );
+  position:relative;
+  flex:none;
+}
+
+.donut::after{
+  content:"10\A sessions";
+  white-space:pre;
+  position:absolute;
+  inset:43px;
+  background:#fff;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  font-weight:700;
+  color:var(--navy-2);
+  font-size:15px;
+  line-height:1.3;
+}
+
+.legend{
+  display:flex;
+  flex-direction:column;
+  gap:11px;
+  font-size:12px;
+  color:var(--ink-soft);
+}
+
+.legend-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.legend-dot{
+  width:11px;
+  height:11px;
+  border-radius:3px;
+  flex:none;
+}
+
+/* Bar charts */
+.bar-chart{
+  display:flex;
+  flex-direction:column;
+  gap:17px;
+  padding:8px 4px 0;
+}
+
+.bar-row{
+  display:grid;
+  grid-template-columns:100px 1fr 55px;
+  align-items:center;
+  gap:10px;
+}
+
+.bar-label{
+  font-size:12px;
+  font-weight:600;
+  color:var(--ink);
+}
+
+.bar-track{
+  height:25px;
+  background:#EDF1F2;
+  border-radius:5px;
+  overflow:hidden;
+}
+
+.bar-fill{
+  height:100%;
+  border-radius:5px;
+  display:flex;
+  align-items:center;
+  padding-left:8px;
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  min-width:3px;
+}
+
+.bar-value{
+  font-size:12px;
+  color:var(--ink-soft);
+  font-weight:600;
+}
+
+/* Device chart */
+.device-chart{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  padding-top:8px;
+}
+
+.device-group{
+  display:grid;
+  grid-template-columns:85px 1fr;
+  gap:12px;
+}
+
+.device-name{
+  font-size:12px;
+  font-weight:700;
+  padding-top:4px;
+}
+
+.metric{
+  margin-bottom:9px;
+}
+
+.metric-head{
+  display:flex;
+  justify-content:space-between;
+  font-size:11px;
+  color:var(--ink-soft);
+  margin-bottom:4px;
+}
+
+.metric-track{
+  height:14px;
+  background:#EDF1F2;
+  border-radius:4px;
+  overflow:hidden;
+}
+
+.metric-fill{
+  height:100%;
+  border-radius:4px;
+}
+
+.controls{
+  display:flex;
+  gap:8px;
+  margin:18px 0;
+  flex-wrap:wrap;
+}
+
+.chip{
+  border:1px solid var(--line);
+  background:#fff;
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:12.5px;
+  cursor:pointer;
+  color:var(--ink-soft);
+  font-weight:600;
+}
+
+.chip:hover{
+  border-color:var(--navy-2);
+  color:var(--navy-2);
+}
+
+.chip.active{
+  background:var(--navy-2);
+  border-color:var(--navy-2);
+  color:#fff;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+  margin-top:16px;
+}
+
+th{
+  background:var(--navy-2);
+  color:#fff;
+  text-align:left;
+  padding:9px 12px;
+  font-weight:600;
+  font-size:12px;
+}
+
+td{
+  padding:9px 12px;
+  border-bottom:1px solid var(--line);
+}
+
+tr:nth-child(even) td{
+  background:#F7F9FA;
+}
+
+.funnel{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  margin-top:18px;
+}
+
+.funnel-row{
+  display:grid;
+  grid-template-columns:180px 1fr 75px;
+  align-items:center;
+  gap:12px;
+}
+
+.page-name{
+  font-size:13px;
+  font-weight:600;
+  text-align:right;
+}
+
+.funnel-bar-track{
+  background:#EDF1F2;
+  border-radius:6px;
+  height:26px;
+  overflow:hidden;
+}
+
+.funnel-bar{
+  height:100%;
+  border-radius:6px;
+  display:flex;
+  align-items:center;
+  padding-left:10px;
+  color:#fff;
+  font-size:11.5px;
+  font-weight:700;
+  min-width:4%;
+}
+
+.stat{
+  font-size:12px;
+  color:var(--ink-soft);
+}
+
+.tag{
+  display:inline-block;
+  padding:2px 9px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:700;
+  color:#fff;
+}
+
+.tag.high{background:var(--bad)}
+.tag.mid{background:var(--mid)}
+.tag.low{background:var(--good)}
+
+.legend-inline{
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+  font-size:12px;
+  color:var(--ink-soft);
+  margin-top:12px;
+}
+
+.legend-inline span{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+
+.legend-inline i{
+  width:10px;
+  height:10px;
+  border-radius:3px;
+  display:inline-block;
+}
+
+.rec-list{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.rec-list li{
+  display:flex;
+  gap:12px;
+  font-size:13.5px;
+  line-height:1.55;
+}
+
+.dot{
+  flex:none;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--ads);
+  margin-top:6px;
+}
+
+.note{
+  font-size:11.5px;
+  color:#8A97A0;
+  margin-top:16px;
+  border-top:1px solid var(--line);
+  padding-top:12px;
+}
+
+@media(max-width:820px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .chart-row{grid-template-columns:1fr}
+  header,.wrap{padding-left:20px;padding-right:20px}
+  .kpi-grid{padding-left:20px;padding-right:20px}
+  .funnel-row{grid-template-columns:110px 1fr 70px}
+}
+
+@media(max-width:550px){
+  .kpi-grid{grid-template-columns:1fr}
+  .section{padding:18px 16px;overflow-x:auto}
+  table{min-width:650px}
+  .donut-wrap{flex-direction:column}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="eyebrow">Analytics · June 10–12, 2026</div>
+  <h1>Web Traffic Analytics Dashboard</h1>
+  <p>Traffic sources, session behavior, conversion performance and page-level drop-off analysis</p>
+</header>
+
+<div class="kpi-grid">
+  <div class="kpi">
+    <div class="val">30%</div>
+    <div class="lbl">Overall Bounce Rate</div>
+    <div class="sub">3 of 10 sessions bounced</div>
+  </div>
+
+  <div class="kpi">
+    <div class="val">170.5s</div>
+    <div class="lbl">Avg Session Duration</div>
+    <div class="sub">across all sessions</div>
+  </div>
+
+  <div class="kpi">
+    <div class="val">3.4</div>
+    <div class="lbl">Avg Pageviews / Session</div>
+    <div class="sub">range: 1–8 pages</div>
+  </div>
+
+  <div class="kpi">
+    <div class="val">50%</div>
+    <div class="lbl">Overall Conversion Rate</div>
+    <div class="sub">5 of 10 sessions converted</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <h2><span class="num">1</span>Traffic Mix &amp; Session Cohorts</h2>
+
+    <p class="desc">
+      The sample contains four traffic channels: Organic, Ads, Direct and Social.
+      Direct contributed the largest number of sessions, while Organic and Ads
+      showed the strongest conversion performance. In this sample, Desktop
+      sessions have higher average duration and pageviews than Mobile sessions.
+    </p>
+
+    <div class="chart-row">
+
+      <div class="chart-box">
+        <h3>Traffic Mix by Channel</h3>
+
+        <div class="donut-wrap">
+          <div class="donut"></div>
+
+          <div class="legend">
+            <div class="legend-item">
+              <span class="legend-dot" style="background:var(--organic)"></span>
+              Organic — 2 sessions (20%)
+            </div>
+
+            <div class="legend-item">
+              <span class="legend-dot" style="background:var(--ads)"></span>
+              Ads — 2 sessions (20%)
+            </div>
+
+            <div class="legend-item">
+              <span class="legend-dot" style="background:var(--direct)"></span>
+              Direct — 3 sessions (30%)
+            </div>
+
+            <div class="legend-item">
+              <span class="legend-dot" style="background:var(--social)"></span>
+              Social — 3 sessions (30%)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-box">
+        <h3>Session Duration &amp; Pageviews by Device</h3>
+
+        <div class="device-chart">
+
+          <div class="device-group">
+            <div class="device-name">Desktop</div>
+
+            <div>
+              <div class="metric">
+                <div class="metric-head">
+                  <span>Avg Duration</span>
+                  <b>236.0s</b>
+                </div>
+                <div class="metric-track">
+                  <div class="metric-fill" style="width:100%;background:var(--organic)"></div>
+                </div>
+              </div>
+
+              <div class="metric">
+                <div class="metric-head">
+                  <span>Avg Pageviews</span>
+                  <b>4.60</b>
+                </div>
+                <div class="metric-track">
+                  <div class="metric-fill" style="width:100%;background:var(--ads)"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="device-group">
+            <div class="device-name">Mobile</div>
+
+            <div>
+              <div class="metric">
+                <div class="metric-head">
+                  <span>Avg Duration</span>
+                  <b>105.0s</b>
+                </div>
+                <div class="metric-track">
+                  <div class="metric-fill" style="width:44.5%;background:var(--organic)"></div>
+                </div>
+              </div>
+
+              <div class="metric">
+                <div class="metric-head">
+                  <span>Avg Pageviews</span>
+                  <b>2.20</b>
+                </div>
+                <div class="metric-track">
+                  <div class="metric-fill" style="width:47.8%;background:var(--ads)"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="controls" id="deviceFilter">
+      <div class="chip active" data-device="All">All Devices</div>
+      <div class="chip" data-device="Desktop">Desktop</div>
+      <div class="chip" data-device="Mobile">Mobile</div>
+    </div>
+
+    <table id="deviceTable">
+      <thead>
+        <tr>
+          <th>Device</th>
+          <th>Sessions</th>
+          <th>Bounce Rate</th>
+          <th>Avg Duration (s)</th>
+          <th>Avg Pageviews</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <h2><span class="num">2</span>Conversion Performance by Traffic Source</h2>
+
+    <p class="desc">
+      Organic Search and Paid Ads converted every sampled session.
+      Direct converted 1 of 3 sessions. Social traffic recorded zero
+      conversions in this sample, with all three Social sessions bouncing
+      after a single pageview.
+    </p>
+
+    <div class="chart-row">
+
+      <div class="chart-box">
+        <h3>Conversion Rate by Channel</h3>
+
+        <div class="bar-chart" id="conversionBars"></div>
+      </div>
+
+      <div class="chart-box">
+        <h3>Bounce Rate by Channel</h3>
+
+        <div class="bar-chart" id="bounceBars"></div>
+      </div>
+
+    </div>
+
+    <table id="channelTable">
+      <thead>
+        <tr>
+          <th>Channel</th>
+          <th>Sessions</th>
+          <th>Conversions</th>
+          <th>Conv. Rate</th>
+          <th>Bounce Rate</th>
+          <th>Avg Duration (s)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <h2><span class="num">3</span>Page-Level Conversion Drop-off Analysis</h2>
+
+    <p class="desc">
+      Pages are ranked by the percentage of sessions that did not convert.
+      A 100% drop-off rate means that none of the sampled sessions associated
+      with that page converted. This dataset contains one PagePath per session,
+      so this should be interpreted as page-level drop-off analysis, not as a
+      sequential user journey funnel.
+    </p>
+
+    <div class="funnel" id="funnelChart"></div>
+
+    <div class="legend-inline">
+      <span><i style="background:var(--bad)"></i>High drop-off (≥75%)</span>
+      <span><i style="background:var(--mid)"></i>Moderate (25–74%)</span>
+      <span><i style="background:var(--good)"></i>Low (&lt;25%)</span>
+    </div>
+
+    <table id="pageTable">
+      <thead>
+        <tr>
+          <th>Page</th>
+          <th>Sessions</th>
+          <th>Conversions</th>
+          <th>Drop-off Rate</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+
+  <!-- SECTION 4 -->
+  <div class="section">
+    <h2><span class="num">4</span>Key Takeaways &amp; Recommendations</h2>
+
+    <ul class="rec-list">
+
+      <li>
+        <span class="dot"></span>
+        <span>
+          <b>Prioritize Organic and Ads:</b>
+          both channels achieved a 100% conversion rate in this sample.
+          They provide the strongest positive conversion signal in the available data.
+        </span>
+      </li>
+
+      <li>
+        <span class="dot"></span>
+        <span>
+          <b>Investigate Social traffic:</b>
+          LinkedIn, Facebook and Twitter each recorded 100% bounce rate
+          and zero conversions in this sample. Possible areas to investigate
+          include landing-page relevance, creative/audience alignment and targeting.
+        </span>
+      </li>
+
+      <li>
+        <span class="dot"></span>
+        <span>
+          <b>Review high-drop-off pages:</b>
+          /contact, /pricing, /blog/python and /blog/ai-trends each recorded
+          100% page-level drop-off. These pages would benefit from reviewing
+          their calls-to-action, navigation and user experience.
+        </span>
+      </li>
+
+      <li>
+        <span class="dot"></span>
+        <span>
+          <b>Investigate Mobile experience:</b>
+          Mobile sessions show lower average duration and pageviews than Desktop
+          sessions in this sample. A mobile UX and performance review would be
+          a reasonable next step.
+        </span>
+      </li>
+
+      <li>
+        <span class="dot"></span>
+        <span>
+          <b>Optimize the /landing page:</b>
+          it received 3 sessions and converted 2 of them, giving it a 66.7%
+          conversion rate in this sample. Further A/B testing could be used to
+          evaluate whether the conversion rate can be improved.
+        </span>
+      </li>
+
+    </ul>
+
+    <div class="note">
+      Sample of 10 sessions across 3 days (June 10–12, 2026).
+      The dataset is small and is intended to demonstrate the analysis
+      methodology. Results should be validated against a larger dataset
+      before making major business decisions.
+    </div>
+  </div>
+
+</div>
+
+
+<script>
+const sessions = [
+  {SessionID:"SESS-5001",Date:"2026-06-10",PagePath:"/landing",Source:"Google Search",DeviceCategory:"Mobile",SessionDurationSec:145,PageViews:3,Converted:"Yes",BounceRate:0},
+  {SessionID:"SESS-5002",Date:"2026-06-10",PagePath:"/courses",Source:"Direct",DeviceCategory:"Desktop",SessionDurationSec:420,PageViews:8,Converted:"Yes",BounceRate:0},
+  {SessionID:"SESS-5003",Date:"2026-06-10",PagePath:"/blog/python",Source:"LinkedIn",DeviceCategory:"Mobile",SessionDurationSec:45,PageViews:1,Converted:"No",BounceRate:1},
+  {SessionID:"SESS-5004",Date:"2026-06-11",PagePath:"/register",Source:"Google Ads",DeviceCategory:"Desktop",SessionDurationSec:210,PageViews:4,Converted:"Yes",BounceRate:0},
+  {SessionID:"SESS-5005",Date:"2026-06-11",PagePath:"/pricing",Source:"Direct",DeviceCategory:"Desktop",SessionDurationSec:60,PageViews:2,Converted:"No",BounceRate:0},
+  {SessionID:"SESS-5006",Date:"2026-06-11",PagePath:"/landing",Source:"Facebook",DeviceCategory:"Mobile",SessionDurationSec:15,PageViews:1,Converted:"No",BounceRate:1},
+  {SessionID:"SESS-5007",Date:"2026-06-12",PagePath:"/courses/data-science",Source:"Google Search",DeviceCategory:"Desktop",SessionDurationSec:310,PageViews:6,Converted:"Yes",BounceRate:0},
+  {SessionID:"SESS-5008",Date:"2026-06-12",PagePath:"/blog/ai-trends",Source:"Twitter",DeviceCategory:"Mobile",SessionDurationSec:30,PageViews:1,Converted:"No",BounceRate:1},
+  {SessionID:"SESS-5009",Date:"2026-06-12",PagePath:"/contact",Source:"Direct",DeviceCategory:"Desktop",SessionDurationSec:180,PageViews:3,Converted:"No",BounceRate:0},
+  {SessionID:"SESS-5010",Date:"2026-06-12",PagePath:"/landing",Source:"Google Ads",DeviceCategory:"Mobile",SessionDurationSec:290,PageViews:5,Converted:"Yes",BounceRate:0}
+];
+
+const channelMap = {
+  "Google Search":"Organic",
+  "Google Ads":"Ads",
+  "Direct":"Direct",
+  "LinkedIn":"Social",
+  "Facebook":"Social",
+  "Twitter":"Social"
+};
+
+const colors = {
+  Organic:"#2E86AB",
+  Ads:"#F18F01",
+  Direct:"#6A4C93",
+  Social:"#C73E1D"
+};
+
+sessions.forEach(s => s.Channel = channelMap[s.Source]);
+
+function avg(arr){
+  return arr.length
+    ? arr.reduce((a,b)=>a+b,0)/arr.length
+    : 0;
+}
+
+
+/* DEVICE TABLE */
+
+function renderDeviceTable(filter){
+
+  const rows = filter === "All"
+    ? sessions
+    : sessions.filter(s => s.DeviceCategory === filter);
+
+  const groups = {};
+
+  rows.forEach(s => {
+    if(!groups[s.DeviceCategory]) groups[s.DeviceCategory] = [];
+    groups[s.DeviceCategory].push(s);
+  });
+
+  const tbody = document.querySelector("#deviceTable tbody");
+  tbody.innerHTML = "";
+
+  Object.keys(groups).sort().forEach(device => {
+
+    const g = groups[device];
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${device}</td>
+      <td>${g.length}</td>
+      <td>${(avg(g.map(x=>x.BounceRate))*100).toFixed(0)}%</td>
+      <td>${avg(g.map(x=>x.SessionDurationSec)).toFixed(1)}</td>
+      <td>${avg(g.map(x=>x.PageViews)).toFixed(2)}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
+
+renderDeviceTable("All");
+
+
+/* DEVICE FILTER */
+
+document.querySelectorAll("#deviceFilter .chip").forEach(chip => {
+
+  chip.addEventListener("click", () => {
+
+    document.querySelectorAll("#deviceFilter .chip")
+      .forEach(c => c.classList.remove("active"));
+
+    chip.classList.add("active");
+
+    renderDeviceTable(chip.dataset.device);
+  });
+
+});
+
+
+/* CHANNEL ANALYSIS */
+
+const channelOrder = ["Organic","Ads","Direct","Social"];
+
+function channelAgg(){
+
+  return channelOrder.map(channel => {
+
+    const rows = sessions.filter(s => s.Channel === channel);
+
+    const conversions =
+      rows.filter(s => s.Converted === "Yes").length;
+
+    return {
+      channel,
+      sessions:rows.length,
+      conversions,
+      convRate:conversions / rows.length * 100,
+      bounceRate:avg(rows.map(s=>s.BounceRate))*100,
+      avgDuration:avg(rows.map(s=>s.SessionDurationSec))
+    };
+  });
+}
+
+const chAgg = channelAgg();
+
+
+/* CONVERSION BARS */
+
+const conversionBars = document.getElementById("conversionBars");
+
+chAgg.forEach(c => {
+
+  const row = document.createElement("div");
+  row.className = "bar-row";
+
+  row.innerHTML = `
+    <div class="bar-label">${c.channel}</div>
+
+    <div class="bar-track">
+      <div class="bar-fill"
+           style="width:${Math.max(c.convRate,3)}%;background:${colors[c.channel]}">
+      </div>
+    </div>
+
+    <div class="bar-value">${c.convRate.toFixed(0)}%</div>
+  `;
+
+  conversionBars.appendChild(row);
+});
+
+
+/* BOUNCE BARS */
+
+const bounceBars = document.getElementById("bounceBars");
+
+chAgg.forEach(c => {
+
+  const row = document.createElement("div");
+  row.className = "bar-row";
+
+  row.innerHTML = `
+    <div class="bar-label">${c.channel}</div>
+
+    <div class="bar-track">
+      <div class="bar-fill"
+           style="width:${Math.max(c.bounceRate,3)}%;background:${colors[c.channel]}">
+      </div>
+    </div>
+
+    <div class="bar-value">${c.bounceRate.toFixed(0)}%</div>
+  `;
+
+  bounceBars.appendChild(row);
+});
+
+
+/* CHANNEL TABLE */
+
+const channelTbody =
+  document.querySelector("#channelTable tbody");
+
+chAgg.forEach(c => {
+
+  const tr = document.createElement("tr");
+
+  tr.innerHTML = `
+    <td>${c.channel}</td>
+    <td>${c.sessions}</td>
+    <td>${c.conversions}</td>
+    <td>${c.convRate.toFixed(1)}%</td>
+    <td>${c.bounceRate.toFixed(1)}%</td>
+    <td>${c.avgDuration.toFixed(1)}</td>
+  `;
+
+  channelTbody.appendChild(tr);
+});
+
+
+/* PAGE-LEVEL DROP-OFF */
+
+function pageAgg(){
+
+  const pages = [...new Set(sessions.map(s=>s.PagePath))];
+
+  return pages.map(page => {
+
+    const rows =
+      sessions.filter(s=>s.PagePath === page);
+
+    const conversions =
+      rows.filter(s=>s.Converted === "Yes").length;
+
+    const dropoff =
+      (rows.length - conversions) / rows.length * 100;
+
+    return {
+      page,
+      sessions:rows.length,
+      conversions,
+      dropoff
+    };
+
+  }).sort((a,b)=>b.dropoff-a.dropoff);
+}
+
+const pgAgg = pageAgg();
+
+
+function statusFor(dropoff){
+
+  if(dropoff >= 75)
+    return {label:"High",cls:"high"};
+
+  if(dropoff >= 25)
+    return {label:"Moderate",cls:"mid"};
+
+  return {label:"Low",cls:"low"};
+}
+
+function colorFor(dropoff){
+
+  if(dropoff >= 75) return "var(--bad)";
+  if(dropoff >= 25) return "var(--mid)";
+  return "var(--good)";
+}
+
+
+/* DROP-OFF BARS */
+
+const funnel =
+  document.getElementById("funnelChart");
+
+pgAgg.forEach(p => {
+
+  const row = document.createElement("div");
+  row.className = "funnel-row";
+
+  row.innerHTML = `
+    <div class="page-name">${p.page}</div>
+
+    <div class="funnel-bar-track">
+      <div class="funnel-bar"
+           style="width:${Math.max(p.dropoff,4)}%;background:${colorFor(p.dropoff)}">
+        ${p.dropoff.toFixed(0)}%
+      </div>
+    </div>
+
+    <div class="stat">n=${p.sessions}</div>
+  `;
+
+  funnel.appendChild(row);
+});
+
+
+/* PAGE TABLE */
+
+const pageTbody =
+  document.querySelector("#pageTable tbody");
+
+pgAgg.forEach(p => {
+
+  const status = statusFor(p.dropoff);
+
+  const tr = document.createElement("tr");
+
+  tr.innerHTML = `
+    <td>${p.page}</td>
+    <td>${p.sessions}</td>
+    <td>${p.conversions}</td>
+    <td>${p.dropoff.toFixed(1)}%</td>
+    <td>
+      <span class="tag ${status.cls}">
+        ${status.label}
+      </span>
+    </td>
+  `;
+
+  pageTbody.appendChild(tr);
+});
+</script>
+
+</body>
+</html>
